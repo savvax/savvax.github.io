@@ -1,34 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>savvax</title>
+    <title>Savva - Software Engineer</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hi, I'm Savva - Software Engineer and Developer">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async
-            src="https://www.googletagmanager.com/gtag/js?id=G-8HPR7NPXFP">
-    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8HPR7NPXFP"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-8HPR7NPXFP');
     </script>
+
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+
+        ::selection {
+            background-color: rgb(34 211 238 / 0.5);
+            color: white;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .title-gradient {
+            background-image: linear-gradient(to right, #2dd2dd 0%, #9a47f3 25%, #fcb26d 50%, #ff61e6 75%, #2dd2dd 100%);
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slide 10s linear infinite;
+        }
+
+        @keyframes slide {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .social-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+    <main class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <article class="my-auto pb-8 max-w-4xl">
+            <div class="mb-6">
+                <h1 class="relative inline-flex flex-col-reverse sm:flex-row mb-3">
+                    <div class="relative inline-block text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight">
+                        <span class="title-gradient">Savva</span>
+                    </div>
+                </h1>
+            </div>
 
+            <p class="block text-lg sm:text-xl font-medium sm:leading-relaxed text-slate-400 dark:text-slate-400 mb-8 w-full md:w-4/5">
+                <span class="transition-colors duration-300 hover:text-slate-600 dark:hover:text-slate-200">
+                    Hi👋🏻 I'm a Software Engineer
+                </span>
+            </p>
 
-    <p style="font-size: 40px">Hi👋🏻 I'm Savva</p>
-    <a href="https://github.com/savvax" target="_blank">[GitHub]</a>
-    <br>
-    <a href="https://linkedin.com/in/savvax" target="_blank">[LinkedIn]</a>
-    <br>
-    <a href="https://t.me/sxvvx" target="_blank">[Telegram]</a>
-    <br>
-    <a href="https://www.instagram.com/savvax/" target="_blank">[Instagram]</a>
-    <br>
-    <a href="mailto:savvax@savvax.com" target="_blank">[Email]</a>
+            <nav class="flex flex-col space-y-3 text-base sm:text-lg">
+                <a href="https://github.com/savvax" target="_blank"
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
+                    GitHub
+                </a>
+                <a href="https://linkedin.com/in/savvax" target="_blank"
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
+                    LinkedIn
+                </a>
+                <a href="https://t.me/sxvvx" target="_blank"
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
+                    Telegram
+                </a>
+                <a href="https://www.instagram.com/savvax/" target="_blank"
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
+                    Instagram
+                </a>
+                <a href="mailto:savvax@savvax.com" target="_blank"
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
+                    Email
+                </a>
+            </nav>
+        </article>
+    </main>
 </body>
+</html>
 
 
 
