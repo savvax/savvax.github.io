@@ -39,6 +39,27 @@
         body {
             overflow-y: scroll;
             cursor: none;
+            position: relative;
+        }
+
+        /* Animated background canvas */
+        #universe-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        #universe-canvas.loaded {
+            opacity: 1;
+        }
+
+        body.bg-white #universe-canvas {
+            display: none;
         }
 
         /* Custom cursor */
@@ -177,9 +198,30 @@
             animation-duration: 0s !important;
             transition-duration: 0s !important;
         }
+
+        /* Ensure content is above canvas */
+        main {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Shooting star animation */
+        @keyframes shootingStar {
+            0% {
+                transform: translate(0, 0) rotate(-45deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-300px, 300px) rotate(-45deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-white dark:bg-neutral-900 text-slate-800 dark:text-slate-200 preload">
+    <!-- Universe animation canvas -->
+    <canvas id="universe-canvas"></canvas>
+
     <!-- Custom cursor -->
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
@@ -282,6 +324,240 @@
             cursorFollower.style.display = 'none';
             document.body.style.cursor = 'auto';
         }
+
+        // ==================== UNIVERSE ANIMATION ====================
+        const canvas = document.getElementById('universe-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        let shootingStars = [];
+        let mousePosition = { x: 0, y: 0 };
+        let particleCount = 150;
+
+        // Resize canvas
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        // Particle class for stars
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height;
+                this.opacity = Math.random();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.z = Math.random() * 1000;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.vz = Math.random() * 2 + 1;
+                this.radius = Math.random() * 2 + 0.5;
+                this.opacity = Math.random() * 0.5 + 0.5;
+                this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+                this.twinkle = 0;
+            }
+
+            update() {
+                // 3D movement
+                this.z -= this.vz;
+                if (this.z <= 0) {
+                    this.reset();
+                    this.z = 1000;
+                }
+
+                // Project 3D to 2D
+                const scale = 1000 / (1000 + this.z);
+                this.projX = (this.x - width / 2) * scale + width / 2;
+                this.projY = (this.y - height / 2) * scale + height / 2;
+                this.projRadius = this.radius * scale;
+
+                // Twinkle effect
+                this.twinkle += this.twinkleSpeed;
+                const twinkleFactor = (Math.sin(this.twinkle) + 1) / 2;
+                this.currentOpacity = this.opacity * twinkleFactor;
+
+                // Gentle drift
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wrap around
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+
+                // Mouse interaction
+                const dx = mousePosition.x - this.projX;
+                const dy = mousePosition.y - this.projY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 100) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (100 - distance) / 100;
+                    this.x -= Math.cos(angle) * force * 2;
+                    this.y -= Math.sin(angle) * force * 2;
+                }
+            }
+
+            draw() {
+                if (this.projX < 0 || this.projX > width || this.projY < 0 || this.projY > height) {
+                    return;
+                }
+
+                ctx.beginPath();
+                const gradient = ctx.createRadialGradient(
+                    this.projX, this.projY, 0,
+                    this.projX, this.projY, this.projRadius * 3
+                );
+
+                // Color based on distance (depth)
+                const hue = 180 + (this.z / 1000) * 60; // Cyan to purple
+                gradient.addColorStop(0, `hsla(${hue}, 80%, 80%, ${this.currentOpacity})`);
+                gradient.addColorStop(0.5, `hsla(${hue}, 80%, 60%, ${this.currentOpacity * 0.5})`);
+                gradient.addColorStop(1, `hsla(${hue}, 80%, 40%, 0)`);
+
+                ctx.fillStyle = gradient;
+                ctx.arc(this.projX, this.projY, this.projRadius * 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Shooting star class
+        class ShootingStar {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height / 2;
+                this.length = Math.random() * 80 + 20;
+                this.speed = Math.random() * 10 + 10;
+                this.opacity = 1;
+                this.life = 1;
+            }
+
+            update() {
+                this.x -= this.speed;
+                this.y += this.speed;
+                this.life -= 0.01;
+                this.opacity = this.life;
+
+                if (this.life <= 0) {
+                    return false;
+                }
+                return true;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(-Math.PI / 4);
+
+                const gradient = ctx.createLinearGradient(0, 0, this.length, 0);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+                gradient.addColorStop(0.5, `rgba(45, 210, 221, ${this.opacity * 0.6})`);
+                gradient.addColorStop(1, 'rgba(45, 210, 221, 0)');
+
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(this.length, 0);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+
+        // Initialize particles
+        function initParticles() {
+            particles = [];
+            particleCount = Math.min(150, Math.floor(width * height / 10000));
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // Draw connections between nearby particles
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].projX - particles[j].projX;
+                    const dy = particles[i].projY - particles[j].projY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) {
+                        const opacity = (1 - distance / 120) * 0.15;
+                        ctx.strokeStyle = `rgba(45, 210, 221, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].projX, particles[i].projY);
+                        ctx.lineTo(particles[j].projX, particles[j].projY);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Create shooting stars randomly
+        function createShootingStar() {
+            if (Math.random() < 0.02 && shootingStars.length < 3) {
+                shootingStars.push(new ShootingStar());
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            // Clear canvas with fade effect
+            ctx.fillStyle = 'rgba(23, 23, 23, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            // Draw connections
+            drawConnections();
+
+            // Update and draw shooting stars
+            createShootingStar();
+            shootingStars = shootingStars.filter(star => {
+                const alive = star.update();
+                if (alive) star.draw();
+                return alive;
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Track mouse position
+        document.addEventListener('mousemove', (e) => {
+            mousePosition.x = e.clientX;
+            mousePosition.y = e.clientY;
+        });
+
+        // Initialize and start animation
+        resizeCanvas();
+        initParticles();
+
+        // Show canvas after initialization
+        setTimeout(() => {
+            canvas.classList.add('loaded');
+        }, 100);
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
     </script>
 </body>
 </html>
