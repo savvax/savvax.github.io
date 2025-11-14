@@ -62,6 +62,27 @@
             display: none;
         }
 
+        /* Snake game canvas */
+        #snake-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            pointer-events: none;
+        }
+
+        #snake-canvas.loaded {
+            opacity: 1;
+        }
+
+        body.bg-white #snake-canvas {
+            display: none;
+        }
+
         /* Custom cursor */
         .cursor {
             width: 20px;
@@ -148,6 +169,11 @@
             position: relative;
             transition: all 0.3s ease;
             display: inline-block;
+            cursor: none;
+        }
+
+        a {
+            cursor: none;
         }
 
         .social-link::after {
@@ -183,6 +209,10 @@
         }
 
         /* Glow effect on hover */
+        .glow-on-hover {
+            transition: text-shadow 0.6s ease;
+        }
+
         .glow-on-hover:hover {
             text-shadow: 0 0 30px rgba(45, 210, 221, 0.6),
                          0 0 60px rgba(154, 71, 243, 0.4);
@@ -221,6 +251,8 @@
 <body class="bg-white dark:bg-neutral-900 text-slate-800 dark:text-slate-200 preload">
     <!-- Universe animation canvas -->
     <canvas id="universe-canvas"></canvas>
+    <!-- Snake game canvas -->
+    <canvas id="snake-canvas"></canvas>
 
     <!-- Custom cursor -->
     <div class="cursor"></div>
@@ -245,23 +277,23 @@
             <nav class="flex flex-col space-y-3 text-base sm:text-lg animate-nav">
                 <a href="https://github.com/savvax" target="_blank"
                    class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
-                    → GitHub
+                    GitHub
                 </a>
                 <a href="https://linkedin.com/in/savvax" target="_blank"
                    class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
-                    → LinkedIn
+                    LinkedIn
                 </a>
                 <a href="https://t.me/sxvvx" target="_blank"
                    class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
-                    → Telegram
+                    Telegram
                 </a>
                 <a href="https://www.instagram.com/savvax/" target="_blank"
                    class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
-                    → Instagram
+                    Instagram
                 </a>
                 <a href="mailto:savvax@savvax.com" target="_blank"
                    class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
-                    → Email
+                    Email
                 </a>
             </nav>
         </article>
@@ -557,6 +589,231 @@
         window.addEventListener('resize', () => {
             resizeCanvas();
             initParticles();
+        });
+
+        // ==================== SNAKE GAME ====================
+        const snakeCanvas = document.getElementById('snake-canvas');
+        const snakeCtx = snakeCanvas.getContext('2d');
+        let snakeWidth, snakeHeight;
+        let gridSize = 20;
+        let snakeBody = [];
+        let food = null;
+        let shouldGrow = false;
+        let mouseGridX = 0;
+        let mouseGridY = 0;
+        let lastHeadX = 0;
+        let lastHeadY = 0;
+
+        // Colors
+        const snakeHeadColor = 'rgba(45, 210, 221, 1)';
+        const snakeBodyDecay = 0.85;
+        const foodColor = 'rgba(252, 178, 109, 1)';
+        const gridColor = 'rgba(45, 210, 221, 0.03)';
+
+        // Resize snake canvas
+        function resizeSnakeCanvas() {
+            snakeWidth = snakeCanvas.width = window.innerWidth;
+            snakeHeight = snakeCanvas.height = window.innerHeight;
+        }
+
+        // Get grid position from mouse
+        function getGridPosition(x, y) {
+            return {
+                x: Math.floor(x / gridSize),
+                y: Math.floor(y / gridSize)
+            };
+        }
+
+        // Draw grid (subtle)
+        function drawGrid() {
+            snakeCtx.strokeStyle = gridColor;
+            snakeCtx.lineWidth = 1;
+
+            for (let x = 0; x < snakeWidth; x += gridSize) {
+                snakeCtx.beginPath();
+                snakeCtx.moveTo(x, 0);
+                snakeCtx.lineTo(x, snakeHeight);
+                snakeCtx.stroke();
+            }
+
+            for (let y = 0; y < snakeHeight; y += gridSize) {
+                snakeCtx.beginPath();
+                snakeCtx.moveTo(0, y);
+                snakeCtx.lineTo(snakeWidth, y);
+                snakeCtx.stroke();
+            }
+        }
+
+        // Create food at random position
+        function createFood() {
+            const maxX = Math.floor(snakeWidth / gridSize);
+            const maxY = Math.floor(snakeHeight / gridSize);
+
+            food = {
+                x: Math.floor(Math.random() * maxX),
+                y: Math.floor(Math.random() * maxY)
+            };
+        }
+
+        // Check if position matches food
+        function checkFood(x, y) {
+            if (food && x === food.x && y === food.y) {
+                shouldGrow = true;
+                createFood();
+                return true;
+            }
+            return false;
+        }
+
+        // Update snake body
+        function updateSnake() {
+            const gridPos = getGridPosition(mousePosition.x, mousePosition.y);
+            mouseGridX = gridPos.x;
+            mouseGridY = gridPos.y;
+
+            // Only add new segment if head moved to new grid position
+            if (mouseGridX !== lastHeadX || mouseGridY !== lastHeadY) {
+                // Check if ate food
+                checkFood(mouseGridX, mouseGridY);
+
+                // Add new head
+                snakeBody.unshift({
+                    x: mouseGridX,
+                    y: mouseGridY,
+                    opacity: 1
+                });
+
+                // Remove tail if not growing
+                if (!shouldGrow && snakeBody.length > 15) {
+                    snakeBody.pop();
+                } else if (shouldGrow) {
+                    shouldGrow = false;
+                }
+
+                lastHeadX = mouseGridX;
+                lastHeadY = mouseGridY;
+            }
+
+            // Update opacity for fade effect
+            for (let i = 0; i < snakeBody.length; i++) {
+                if (i > 0) {
+                    snakeBody[i].opacity *= snakeBodyDecay;
+                }
+            }
+
+            // Remove segments with very low opacity
+            snakeBody = snakeBody.filter(segment => segment.opacity > 0.01);
+        }
+
+        // Draw snake
+        function drawSnake() {
+            for (let i = snakeBody.length - 1; i >= 0; i--) {
+                const segment = snakeBody[i];
+                const alpha = segment.opacity;
+
+                // Create gradient for each segment
+                const gradient = snakeCtx.createRadialGradient(
+                    segment.x * gridSize + gridSize / 2,
+                    segment.y * gridSize + gridSize / 2,
+                    0,
+                    segment.x * gridSize + gridSize / 2,
+                    segment.y * gridSize + gridSize / 2,
+                    gridSize
+                );
+
+                if (i === 0) {
+                    // Head - brighter
+                    gradient.addColorStop(0, `rgba(45, 210, 221, ${alpha})`);
+                    gradient.addColorStop(0.5, `rgba(45, 210, 221, ${alpha * 0.7})`);
+                    gradient.addColorStop(1, `rgba(45, 210, 221, 0)`);
+                } else {
+                    // Body - gradient to purple
+                    const hue = 180 + (i / snakeBody.length) * 60;
+                    gradient.addColorStop(0, `hsla(${hue}, 80%, 70%, ${alpha})`);
+                    gradient.addColorStop(0.5, `hsla(${hue}, 80%, 60%, ${alpha * 0.7})`);
+                    gradient.addColorStop(1, `hsla(${hue}, 80%, 50%, 0)`);
+                }
+
+                snakeCtx.fillStyle = gradient;
+                snakeCtx.fillRect(
+                    segment.x * gridSize,
+                    segment.y * gridSize,
+                    gridSize,
+                    gridSize
+                );
+            }
+        }
+
+        // Draw food
+        function drawFood() {
+            if (!food) return;
+
+            const gradient = snakeCtx.createRadialGradient(
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2,
+                0,
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2,
+                gridSize
+            );
+
+            gradient.addColorStop(0, foodColor);
+            gradient.addColorStop(0.5, 'rgba(252, 178, 109, 0.7)');
+            gradient.addColorStop(1, 'rgba(252, 178, 109, 0)');
+
+            snakeCtx.fillStyle = gradient;
+            snakeCtx.fillRect(
+                food.x * gridSize,
+                food.y * gridSize,
+                gridSize,
+                gridSize
+            );
+
+            // Pulsing effect
+            const pulseSize = Math.sin(Date.now() / 200) * 2;
+            snakeCtx.fillStyle = 'rgba(252, 178, 109, 0.3)';
+            snakeCtx.fillRect(
+                food.x * gridSize - pulseSize,
+                food.y * gridSize - pulseSize,
+                gridSize + pulseSize * 2,
+                gridSize + pulseSize * 2
+            );
+        }
+
+        // Snake animation loop
+        function animateSnake() {
+            // Clear canvas
+            snakeCtx.fillStyle = 'rgba(23, 23, 23, 0.05)';
+            snakeCtx.fillRect(0, 0, snakeWidth, snakeHeight);
+
+            // Draw grid
+            drawGrid();
+
+            // Update and draw snake
+            updateSnake();
+            drawSnake();
+
+            // Draw food
+            drawFood();
+
+            requestAnimationFrame(animateSnake);
+        }
+
+        // Initialize snake game
+        resizeSnakeCanvas();
+        createFood();
+
+        // Show snake canvas after initialization
+        setTimeout(() => {
+            snakeCanvas.classList.add('loaded');
+        }, 100);
+
+        animateSnake();
+
+        // Handle snake canvas resize
+        window.addEventListener('resize', () => {
+            resizeSnakeCanvas();
+            createFood();
         });
     </script>
 </body>
