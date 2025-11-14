@@ -38,8 +38,74 @@
 
         body {
             overflow-y: scroll;
+            cursor: none;
         }
 
+        /* Custom cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #2dd2dd;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(45, 210, 221, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.3s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-hover {
+            transform: scale(1.5);
+        }
+
+        /* Fade in animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-title {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .animate-text {
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        .animate-nav {
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+
+        /* Gradient animation */
         .title-gradient {
             background-image: linear-gradient(to right, #2dd2dd 0%, #9a47f3 25%, #fcb26d 50%, #ff61e6 75%, #2dd2dd 100%);
             background-size: 200% auto;
@@ -47,6 +113,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: slide 10s linear infinite;
+            transition: transform 0.3s ease;
         }
 
         @keyframes slide {
@@ -55,52 +122,167 @@
             }
         }
 
+        /* Enhanced link styles */
         .social-link {
-            transition: color 0.3s, border-color 0.3s;
+            position: relative;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .social-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(to right, #2dd2dd, #9a47f3);
+            transition: width 0.3s ease;
+        }
+
+        .social-link:hover::after {
+            width: 100%;
+        }
+
+        .social-link:hover {
+            transform: translateX(10px);
+            text-shadow: 0 0 20px rgba(45, 210, 221, 0.3);
+        }
+
+        /* Emoji animation */
+        .wave {
+            display: inline-block;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-15deg); }
+        }
+
+        /* Glow effect on hover */
+        .glow-on-hover:hover {
+            text-shadow: 0 0 30px rgba(45, 210, 221, 0.6),
+                         0 0 60px rgba(154, 71, 243, 0.4);
+        }
+
+        /* Parallax container */
+        .parallax-container {
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Loading animation prevention */
+        .preload * {
+            animation-duration: 0s !important;
+            transition-duration: 0s !important;
         }
     </style>
 </head>
-<body class="bg-white dark:bg-neutral-900 text-slate-800 dark:text-slate-200">
+<body class="bg-white dark:bg-neutral-900 text-slate-800 dark:text-slate-200 preload">
+    <!-- Custom cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
     <main class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <article class="my-auto pb-8 max-w-4xl">
-            <div class="mb-6">
+        <article class="my-auto pb-8 max-w-4xl parallax-container">
+            <div class="mb-6 animate-title">
                 <h1 class="relative inline-flex flex-col-reverse sm:flex-row mb-3">
                     <div class="relative inline-block text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight">
-                        <span class="title-gradient">Savva</span>
+                        <span class="title-gradient glow-on-hover">Savva</span>
                     </div>
                 </h1>
             </div>
 
-            <p class="block text-lg sm:text-xl font-medium sm:leading-relaxed text-slate-400 dark:text-slate-400 mb-8 w-full md:w-4/5">
+            <p class="block text-lg sm:text-xl font-medium sm:leading-relaxed text-slate-400 dark:text-slate-400 mb-8 w-full md:w-4/5 animate-text">
                 <span class="transition-colors duration-300 hover:text-slate-600 dark:hover:text-slate-200">
-                    Hi👋🏻 I'm a Software Engineer
+                    Hi<span class="wave">👋🏻</span> I'm a Software Engineer
                 </span>
             </p>
 
-            <nav class="flex flex-col space-y-3 text-base sm:text-lg">
+            <nav class="flex flex-col space-y-3 text-base sm:text-lg animate-nav">
                 <a href="https://github.com/savvax" target="_blank"
-                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
-                    GitHub
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
+                    → GitHub
                 </a>
                 <a href="https://linkedin.com/in/savvax" target="_blank"
-                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
-                    LinkedIn
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
+                    → LinkedIn
                 </a>
                 <a href="https://t.me/sxvvx" target="_blank"
-                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
-                    Telegram
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
+                    → Telegram
                 </a>
                 <a href="https://www.instagram.com/savvax/" target="_blank"
-                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
-                    Instagram
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
+                    → Instagram
                 </a>
                 <a href="mailto:savvax@savvax.com" target="_blank"
-                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border-b border-transparent hover:border-slate-400 dark:hover:border-slate-400 inline-block w-fit">
-                    Email
+                   class="social-link text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-block w-fit">
+                    → Email
                 </a>
             </nav>
         </article>
     </main>
+
+    <script>
+        // Remove preload class after page loads
+        window.addEventListener('load', () => {
+            document.body.classList.remove('preload');
+        });
+
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            cursor.style.transform = `translate(${mouseX - 10}px, ${mouseY - 10}px)`;
+        });
+
+        // Smooth follower animation
+        function animateFollower() {
+            followerX += (mouseX - followerX) * 0.1;
+            followerY += (mouseY - followerY) * 0.1;
+
+            cursorFollower.style.transform = `translate(${followerX - 20}px, ${followerY - 20}px)`;
+
+            requestAnimationFrame(animateFollower);
+        }
+        animateFollower();
+
+        // Cursor hover effect
+        const links = document.querySelectorAll('a, .title-gradient');
+        links.forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                cursor.classList.add('cursor-hover');
+                cursorFollower.classList.add('cursor-hover');
+            });
+            link.addEventListener('mouseleave', () => {
+                cursor.classList.remove('cursor-hover');
+                cursorFollower.classList.remove('cursor-hover');
+            });
+        });
+
+        // Parallax effect
+        const parallaxContainer = document.querySelector('.parallax-container');
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            parallaxContainer.style.transform = `translate(${x}px, ${y}px)`;
+        });
+
+        // Mobile detection - disable cursor on touch devices
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            cursor.style.display = 'none';
+            cursorFollower.style.display = 'none';
+            document.body.style.cursor = 'auto';
+        }
+    </script>
 </body>
 </html>
 
