@@ -544,7 +544,7 @@
         // Animation loop
         function animate() {
             // Clear canvas with fade effect
-            ctx.fillStyle = 'rgba(23, 23, 23, 0.1)';
+            ctx.fillStyle = 'rgba(23, 23, 23, 0.3)';
             ctx.fillRect(0, 0, width, height);
 
             // Update and draw particles
@@ -594,7 +594,7 @@
         const snakeCanvas = document.getElementById('snake-canvas');
         const snakeCtx = snakeCanvas.getContext('2d');
         let snakeWidth, snakeHeight;
-        let gridSize = 30;
+        let gridSize = 40;
         let snakeBody = [];
         let food = null;
         let shouldGrow = false;
@@ -605,9 +605,9 @@
 
         // Colors
         const snakeHeadColor = 'rgba(45, 210, 221, 1)';
-        const snakeBodyDecay = 0.92;
+        const snakeBodyDecay = 0.95;
         const foodColor = 'rgba(252, 178, 109, 1)';
-        const gridColor = 'rgba(45, 210, 221, 0.2)';
+        const gridColor = 'rgba(45, 210, 221, 0.4)';
 
         // Resize snake canvas
         function resizeSnakeCanvas() {
@@ -623,10 +623,10 @@
             };
         }
 
-        // Draw grid (subtle)
+        // Draw grid (visible)
         function drawGrid() {
             snakeCtx.strokeStyle = gridColor;
-            snakeCtx.lineWidth = 2;
+            snakeCtx.lineWidth = 1;
 
             for (let x = 0; x < snakeWidth; x += gridSize) {
                 snakeCtx.beginPath();
@@ -683,7 +683,7 @@
                 });
 
                 // Remove tail if not growing
-                if (!shouldGrow && snakeBody.length > 40) {
+                if (!shouldGrow && snakeBody.length > 50) {
                     snakeBody.pop();
                 } else if (shouldGrow) {
                     shouldGrow = false;
@@ -710,36 +710,29 @@
                 const segment = snakeBody[i];
                 const alpha = segment.opacity;
 
-                // Create gradient for each segment
-                const gradient = snakeCtx.createRadialGradient(
-                    segment.x * gridSize + gridSize / 2,
-                    segment.y * gridSize + gridSize / 2,
-                    0,
-                    segment.x * gridSize + gridSize / 2,
-                    segment.y * gridSize + gridSize / 2,
-                    gridSize
-                );
-
                 if (i === 0) {
-                    // Head - brighter
-                    gradient.addColorStop(0, `rgba(45, 210, 221, ${alpha})`);
-                    gradient.addColorStop(0.5, `rgba(45, 210, 221, ${alpha * 0.7})`);
-                    gradient.addColorStop(1, `rgba(45, 210, 221, 0)`);
+                    // Head - very bright cyan
+                    snakeCtx.fillStyle = `rgba(45, 210, 221, ${alpha})`;
+                    snakeCtx.shadowBlur = 20;
+                    snakeCtx.shadowColor = 'rgba(45, 210, 221, 0.8)';
                 } else {
-                    // Body - gradient to purple
+                    // Body - gradient from cyan to purple
                     const hue = 180 + (i / snakeBody.length) * 60;
-                    gradient.addColorStop(0, `hsla(${hue}, 80%, 70%, ${alpha})`);
-                    gradient.addColorStop(0.5, `hsla(${hue}, 80%, 60%, ${alpha * 0.7})`);
-                    gradient.addColorStop(1, `hsla(${hue}, 80%, 50%, 0)`);
+                    snakeCtx.fillStyle = `hsla(${hue}, 90%, 65%, ${alpha})`;
+                    snakeCtx.shadowBlur = 15;
+                    snakeCtx.shadowColor = `hsla(${hue}, 90%, 65%, 0.6)`;
                 }
 
-                snakeCtx.fillStyle = gradient;
+                // Draw filled rectangle with glow
                 snakeCtx.fillRect(
-                    segment.x * gridSize,
-                    segment.y * gridSize,
-                    gridSize,
-                    gridSize
+                    segment.x * gridSize + 2,
+                    segment.y * gridSize + 2,
+                    gridSize - 4,
+                    gridSize - 4
                 );
+
+                // Reset shadow
+                snakeCtx.shadowBlur = 0;
             }
         }
 
@@ -747,43 +740,28 @@
         function drawFood() {
             if (!food) return;
 
-            const gradient = snakeCtx.createRadialGradient(
-                food.x * gridSize + gridSize / 2,
-                food.y * gridSize + gridSize / 2,
-                0,
-                food.x * gridSize + gridSize / 2,
-                food.y * gridSize + gridSize / 2,
-                gridSize
-            );
-
-            gradient.addColorStop(0, foodColor);
-            gradient.addColorStop(0.5, 'rgba(252, 178, 109, 0.7)');
-            gradient.addColorStop(1, 'rgba(252, 178, 109, 0)');
-
-            snakeCtx.fillStyle = gradient;
-            snakeCtx.fillRect(
-                food.x * gridSize,
-                food.y * gridSize,
-                gridSize,
-                gridSize
-            );
-
             // Pulsing effect
-            const pulseSize = Math.sin(Date.now() / 200) * 2;
-            snakeCtx.fillStyle = 'rgba(252, 178, 109, 0.3)';
+            const pulse = Math.sin(Date.now() / 300) * 0.3 + 0.7;
+
+            snakeCtx.fillStyle = `rgba(252, 178, 109, ${pulse})`;
+            snakeCtx.shadowBlur = 25;
+            snakeCtx.shadowColor = 'rgba(252, 178, 109, 0.8)';
+
             snakeCtx.fillRect(
-                food.x * gridSize - pulseSize,
-                food.y * gridSize - pulseSize,
-                gridSize + pulseSize * 2,
-                gridSize + pulseSize * 2
+                food.x * gridSize + 2,
+                food.y * gridSize + 2,
+                gridSize - 4,
+                gridSize - 4
             );
+
+            // Reset shadow
+            snakeCtx.shadowBlur = 0;
         }
 
         // Snake animation loop
         function animateSnake() {
-            // Clear canvas with slight fade for trail effect
-            snakeCtx.fillStyle = 'rgba(23, 23, 23, 0.3)';
-            snakeCtx.fillRect(0, 0, snakeWidth, snakeHeight);
+            // Clear canvas completely (no fade, full visibility)
+            snakeCtx.clearRect(0, 0, snakeWidth, snakeHeight);
 
             // Draw grid
             drawGrid();
