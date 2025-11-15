@@ -69,9 +69,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-            opacity: 0;
-            transition: opacity 1s ease-in;
+            z-index: 2;
+            opacity: 1;
             pointer-events: none;
         }
 
@@ -232,7 +231,7 @@
         /* Ensure content is above canvas */
         main {
             position: relative;
-            z-index: 1;
+            z-index: 10;
         }
 
         /* Shooting star animation */
@@ -595,7 +594,7 @@
         const snakeCanvas = document.getElementById('snake-canvas');
         const snakeCtx = snakeCanvas.getContext('2d');
         let snakeWidth, snakeHeight;
-        let gridSize = 25;
+        let gridSize = 30;
         let snakeBody = [];
         let food = null;
         let shouldGrow = false;
@@ -606,9 +605,9 @@
 
         // Colors
         const snakeHeadColor = 'rgba(45, 210, 221, 1)';
-        const snakeBodyDecay = 0.85;
+        const snakeBodyDecay = 0.92;
         const foodColor = 'rgba(252, 178, 109, 1)';
-        const gridColor = 'rgba(45, 210, 221, 0.1)';
+        const gridColor = 'rgba(45, 210, 221, 0.2)';
 
         // Resize snake canvas
         function resizeSnakeCanvas() {
@@ -627,7 +626,7 @@
         // Draw grid (subtle)
         function drawGrid() {
             snakeCtx.strokeStyle = gridColor;
-            snakeCtx.lineWidth = 1;
+            snakeCtx.lineWidth = 2;
 
             for (let x = 0; x < snakeWidth; x += gridSize) {
                 snakeCtx.beginPath();
@@ -684,7 +683,7 @@
                 });
 
                 // Remove tail if not growing
-                if (!shouldGrow && snakeBody.length > 25) {
+                if (!shouldGrow && snakeBody.length > 40) {
                     snakeBody.pop();
                 } else if (shouldGrow) {
                     shouldGrow = false;
@@ -783,7 +782,7 @@
         // Snake animation loop
         function animateSnake() {
             // Clear canvas with slight fade for trail effect
-            snakeCtx.fillStyle = 'rgba(23, 23, 23, 0.15)';
+            snakeCtx.fillStyle = 'rgba(23, 23, 23, 0.3)';
             snakeCtx.fillRect(0, 0, snakeWidth, snakeHeight);
 
             // Draw grid
