@@ -72,14 +72,11 @@
             z-index: 2;
             opacity: 1;
             pointer-events: none;
+            background: rgba(0, 0, 0, 0.85);
         }
 
         #snake-canvas.loaded {
             opacity: 1;
-        }
-
-        body.bg-white #snake-canvas {
-            display: none;
         }
 
         /* Custom cursor */
@@ -591,6 +588,7 @@
         });
 
         // ==================== SNAKE GAME ====================
+        console.log('Snake game initializing...');
         const snakeCanvas = document.getElementById('snake-canvas');
         const snakeCtx = snakeCanvas.getContext('2d');
         let snakeWidth, snakeHeight;
@@ -603,11 +601,11 @@
         let lastHeadX = 0;
         let lastHeadY = 0;
 
-        // Colors
+        // Colors - EXTREMELY BRIGHT
         const snakeHeadColor = 'rgba(45, 210, 221, 1)';
         const snakeBodyDecay = 0.96;
         const foodColor = 'rgba(252, 178, 109, 1)';
-        const gridColor = 'rgba(45, 210, 221, 0.8)';
+        const gridColor = 'rgba(0, 255, 255, 1)'; // Pure cyan - maximum visibility
 
         // Resize snake canvas
         function resizeSnakeCanvas() {
@@ -623,10 +621,10 @@
             };
         }
 
-        // Draw grid (visible)
+        // Draw grid (MAXIMUM visibility)
         function drawGrid() {
             snakeCtx.strokeStyle = gridColor;
-            snakeCtx.lineWidth = 2;
+            snakeCtx.lineWidth = 3;
 
             for (let x = 0; x < snakeWidth; x += gridSize) {
                 snakeCtx.beginPath();
@@ -778,14 +776,21 @@
         }
 
         // Initialize snake game
+        console.log('Resizing snake canvas...');
         resizeSnakeCanvas();
+        console.log('Canvas size:', snakeWidth, 'x', snakeHeight);
+
+        console.log('Creating food...');
         createFood();
+        console.log('Food position:', food);
 
         // Show snake canvas after initialization
         setTimeout(() => {
             snakeCanvas.classList.add('loaded');
+            console.log('Snake canvas loaded');
         }, 100);
 
+        console.log('Starting snake animation...');
         animateSnake();
 
         // Handle snake canvas resize
