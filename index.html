@@ -72,11 +72,23 @@
             z-index: 2;
             opacity: 1;
             pointer-events: none;
-            background: rgba(0, 0, 0, 0.85);
         }
 
         #snake-canvas.loaded {
             opacity: 1;
+        }
+
+        /* Vignette overlay */
+        #snake-canvas::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, transparent 20%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.8) 100%);
+            pointer-events: none;
+            z-index: 1;
         }
 
         /* Custom cursor */
@@ -601,11 +613,11 @@
         let lastHeadX = 0;
         let lastHeadY = 0;
 
-        // Colors - EXTREMELY BRIGHT
+        // Colors - Darker for better aesthetics
         const snakeHeadColor = 'rgba(45, 210, 221, 1)';
         const snakeBodyDecay = 0.96;
         const foodColor = 'rgba(252, 178, 109, 1)';
-        const gridColor = 'rgba(0, 255, 255, 1)'; // Pure cyan - maximum visibility
+        const gridColor = 'rgba(45, 210, 221, 0.15)'; // Subtle grid
 
         // Resize snake canvas
         function resizeSnakeCanvas() {
@@ -621,10 +633,10 @@
             };
         }
 
-        // Draw grid (MAXIMUM visibility)
+        // Draw grid (subtle)
         function drawGrid() {
             snakeCtx.strokeStyle = gridColor;
-            snakeCtx.lineWidth = 3;
+            snakeCtx.lineWidth = 1;
 
             for (let x = 0; x < snakeWidth; x += gridSize) {
                 snakeCtx.beginPath();
@@ -709,24 +721,24 @@
                 const alpha = segment.opacity;
 
                 if (i === 0) {
-                    // Head - very bright cyan
+                    // Head - subtle glow
                     snakeCtx.fillStyle = `rgba(45, 210, 221, ${alpha})`;
-                    snakeCtx.shadowBlur = 30;
-                    snakeCtx.shadowColor = 'rgba(45, 210, 221, 1)';
+                    snakeCtx.shadowBlur = 10;
+                    snakeCtx.shadowColor = 'rgba(45, 210, 221, 0.4)';
                 } else {
                     // Body - gradient from cyan to purple
                     const hue = 180 + (i / snakeBody.length) * 60;
-                    snakeCtx.fillStyle = `hsla(${hue}, 100%, 60%, ${alpha})`;
-                    snakeCtx.shadowBlur = 20;
-                    snakeCtx.shadowColor = `hsla(${hue}, 100%, 60%, 0.8)`;
+                    snakeCtx.fillStyle = `hsla(${hue}, 80%, 50%, ${alpha})`;
+                    snakeCtx.shadowBlur = 8;
+                    snakeCtx.shadowColor = `hsla(${hue}, 80%, 50%, 0.3)`;
                 }
 
-                // Draw filled rectangle with glow (full size)
+                // Draw filled rectangle with subtle glow
                 snakeCtx.fillRect(
-                    segment.x * gridSize + 1,
-                    segment.y * gridSize + 1,
-                    gridSize - 2,
-                    gridSize - 2
+                    segment.x * gridSize + 2,
+                    segment.y * gridSize + 2,
+                    gridSize - 4,
+                    gridSize - 4
                 );
 
                 // Reset shadow
@@ -739,17 +751,17 @@
             if (!food) return;
 
             // Pulsing effect
-            const pulse = Math.sin(Date.now() / 300) * 0.2 + 0.8;
+            const pulse = Math.sin(Date.now() / 300) * 0.2 + 0.6;
 
             snakeCtx.fillStyle = `rgba(252, 178, 109, ${pulse})`;
-            snakeCtx.shadowBlur = 35;
-            snakeCtx.shadowColor = 'rgba(252, 178, 109, 1)';
+            snakeCtx.shadowBlur = 12;
+            snakeCtx.shadowColor = 'rgba(252, 178, 109, 0.4)';
 
             snakeCtx.fillRect(
-                food.x * gridSize + 1,
-                food.y * gridSize + 1,
-                gridSize - 2,
-                gridSize - 2
+                food.x * gridSize + 2,
+                food.y * gridSize + 2,
+                gridSize - 4,
+                gridSize - 4
             );
 
             // Reset shadow
@@ -758,8 +770,8 @@
 
         // Snake animation loop
         function animateSnake() {
-            // Fill with SOLID black background to make snake EXTREMELY visible
-            snakeCtx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            // Fill with very dark background
+            snakeCtx.fillStyle = 'rgba(10, 10, 15, 0.95)';
             snakeCtx.fillRect(0, 0, snakeWidth, snakeHeight);
 
             // Draw grid
